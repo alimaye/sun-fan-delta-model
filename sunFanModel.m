@@ -16,7 +16,7 @@ addpath(genpath('source'))
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Set model parameters 
 runName = 'run1'; % base name for run and file output
-clobber = false; % whether to overwrite output folder if exists
+clobber = true; % whether to overwrite output folder if exists
 
 % Dimensionless parameters (from Table 1)
 alpha_so = 11.25;
@@ -164,10 +164,22 @@ end
         % path from i-->j to i-->k initiated if criterion is met.
         newAvulsions = avulsionCheck(grid,beta);
         
+        % check for loops in flow
+        [loopFlag,indLoop] = findFlowLoops(grid);
+        if loopFlag
+            error('Flow loop found');
+        end
+        
         % if any avulsion sites were identified, enact avulsions that 
         % create new flow paths
         if ~isempty(newAvulsions.rNew)   
             grid = enactAvulsions(newAvulsions,grid,inlet);
+        end
+        
+        % check for loops in flow
+        [loopFlag,indLoop] = findFlowLoops(grid);
+        if loopFlag
+            error('Flow loop found');
         end
         
         % episodically save model output
