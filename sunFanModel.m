@@ -21,7 +21,7 @@ loadCheckpoint = false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Set model parameters 
 runName = 'run1'; % base name for run and file output
-clobber = false; % whether to overwrite output folder if exists
+clobber = true; % whether to overwrite output folder if exists
 
 % Dimensionless parameters (from Table 1)
 alpha_so = 11.25;
@@ -42,6 +42,9 @@ gamma = 0.5;
 lambda = 0.4;
 beta = 1;
 
+con = load_conset('mars-quartz-water');
+R = con.R;
+
 % Dimensioned parameters (from Table 2, base case)
 Qw_inlet = 20; % water discharge, m^3/s
 Qs_inlet = 0.04; % sediment discharge, m^3/s (named Q_sf in original paper)
@@ -49,6 +52,9 @@ Qw_threshold = 0.05; % water discharge fraction to cut off channels
 Qw_mismatch_tolerance = 1e-3; % tolerance param for raising a water mass-conservation error
 D = 0.3e-3; % grain diameter, m
 oceanLevel = 0.01; %elevation of ponded water, m (named xi_theta in the paper)
+
+[tau_c, tauStar_c] = get_criticalstress(D, con);
+abandonmentThreshold = tauStar_c;
 
 grid.dx = 100; % grid spacing, m (named "a" in the paper)
 grid.xExtent = 100*grid.dx; % side length of square domain, m (named L_b in the paper)
@@ -177,7 +183,7 @@ iter = 0;
         
         % check that any channels that are receiving flow below threshold
         % are disconnected from the network
-        grid = unmarkAbandonedChannels(grid,Qw_threshold);
+        grid = unmarkAbandonedChannels(grid,Qw_threshold,abandonmentThreshold,R,D);
         
         % check for avulsion sites (criterion: eqn. 13). Change of flow
         % path from i-->j to i-->k initiated if criterion is met.

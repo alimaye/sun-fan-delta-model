@@ -1,4 +1,4 @@
-function grid=unmarkAbandonedChannels(grid,Qw_threshold)
+function grid=unmarkAbandonedChannels(grid,Qw_threshold,abandonmentThreshold,R,D)
 %unmarkAbandonedChannels Unmark abandoned channels in tracking arrays
 %   This function loops through the `grid`, and along channel pathways, to
 %   unmark (i.e., disconnect) channel pathways that have been abandoned.
@@ -21,6 +21,9 @@ function grid=unmarkAbandonedChannels(grid,Qw_threshold)
         end
     end
 
+    % compute the shields stress everywhere
+    grid.stress = (grid.H .* grid.S.alongFlow) ./ (R * D);
+    
     % loop through the branches and check cells downstream of the branch
     % point (i.e., the `flowsTo{branchIndex}`) against the discharge
     % threshold.
