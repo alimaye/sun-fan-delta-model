@@ -18,6 +18,15 @@
                     % depths, the depth used in the avulsion criterion
                     % (eqn. 13) is set to zero so that it does not affect
                     % avulsion susceptibility.
+
+                    % an alternative implementation: use the slope of the
+                    % cell fromsFrom
+                    if k == 4950 % no upstream node to the inlet at t=0, could be avoided by defining a flowsTo before time loop?
+                        grid.S.alongFlow(k) = 0;
+                    else % other cells, use the upstream contributing slopes
+                        upstreamSlopes = grid.S.alongFlow(grid.flowsFrom{k});
+                        grid.S.alongFlow(k) = mean(upstreamSlopes); % mean() ensures scalar
+                    end
                 else
                     % if this cell is a channel cell, look up the cell(s) it
                     % flows to
